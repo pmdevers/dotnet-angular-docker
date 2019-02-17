@@ -1,0 +1,36 @@
+### STAGE 1: Build ###
+
+# We label our stage as 'builder'
+FROM node:8 as builder
+
+ARG NPM_TOKEN 
+
+RUN mkdir /usr/src/app
+WORKDIR /usr/src/app
+
+COPY package*.json /usr/src/app/
+RUN yarn global add npm
+RUN npm install
+
+COPY . /usr/src/app/
+
+RUN npm run build 
+
+
+### STAGE 2: Setup ###
+
+FROM nginx:1.14.2-alpine
+
+## Copy our default nginx config
+COPY nginx/default.conf /etc/nginx/conf.d/
+
+## Remove default nginx website
+RUN rm -rf /usr/share/nginx/html/*
+
+## From 'builder' stage copy over the artifacts in dist folder to default nginx public folder
+COPY --from=builder /usr/src/app/dist/admin /usr/share/nginx/html
+
+# expose port 80
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

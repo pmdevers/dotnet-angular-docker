@@ -1,0 +1,14 @@
+# base image
+FROM nginx:alpine
+
+# update default configuration
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# expose port 80
+EXPOSE 80
+
+ARG buildtime_version
+ENV BUILDVERSION=${buildtime_version}
+
+# run nginx
+CMD ["nginx", "-g", "daemon off;"]
