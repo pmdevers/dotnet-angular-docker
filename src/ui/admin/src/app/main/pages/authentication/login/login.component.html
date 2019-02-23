@@ -1,0 +1,24 @@
+<div>
+
+<form name="loginForm" [formGroup]="loginForm" novalidate>
+    <div>
+        <input type="text" placeholder="Email" formControlName="email">
+        <div *ngIf="!loginForm.get('email').hasError('required')">
+            Email is required
+        </div>
+        <div *ngIf="!loginForm.get('email').hasError('required') && !loginForm.get('email').hasError('email')">
+            please enter a valid email address
+        </div>
+    </div>
+
+    <div>
+        <input type="password" placeholder="Password" formControlName="password">
+        <div *ngIf="!loginForm.get('password').hasError('required')">
+            Password is required
+        </div>
+    </div>
+
+    <button [disabled]="loginForm.invalid" (click)="login()">LOGIN</button>
+</form>
+
+</div>
