@@ -1,7 +1,10 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { PmdeversConfigService } from 'src/@pmdevers/services/config.service';
-import { PmdeversAuthenticationService } from 'src/@pmdevers/services/authentication.service';
+import { PmdeversConfigService } from '@pmdevers/services/config.service';
+import { PmdeversAuthenticationService } from '@pmdevers/services/authentication.service';
+import { first } from 'rxjs/operators';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Action } from 'rxjs/internal/scheduler/Action';
 
 @Component({
     selector: 'login',
@@ -12,11 +15,17 @@ import { PmdeversAuthenticationService } from 'src/@pmdevers/services/authentica
 export class LoginComponent implements OnInit {
 
     loginForm: FormGroup;
+    loading = false;
+    submitted = false;
+    error = '';
+    private _returnUrl: string;
 
     constructor(
         private _configService: PmdeversConfigService,
         private _authenticationService: PmdeversAuthenticationService,
-        private _formBuilder: FormBuilder
+        private _formBuilder: FormBuilder,
+        private _route: ActivatedRoute,
+        private _router: Router
     ) { 
         this._configService.config = {
             layout: {
@@ -34,6 +43,8 @@ export class LoginComponent implements OnInit {
                 }
             }
         };
+
+        this._returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/';
     }
 
     ngOnInit() { 
@@ -44,7 +55,20 @@ export class LoginComponent implements OnInit {
     }
 
     login(){
-        this._authenticationService.log
+        const values = this.loginForm.value;
+
+        console.log(values);
+        this._authenticationService.login(values.email, values.password)
+            .pipe(first())
+            .subscribe(
+                data => {
+                    this._router.navigate([this._returnUrl])
+                },
+                error => {
+                    this.error = error;
+                    this.loading = false;
+                }
+            )
     }
 
 }

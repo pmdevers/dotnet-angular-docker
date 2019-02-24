@@ -13,6 +13,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+using security.Services;
 using security.Settings;
 
 namespace security
@@ -43,13 +45,6 @@ namespace security
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(x => {
-                x.Events = new JwtBearerEvents {
-                    OnTokenValidated = context => {
-                        // TODO Validate token deligate
-
-                        return Task.CompletedTask;
-                    }
-                };
                 x.RequireHttpsMetadata = false;
                 x.SaveToken = true;
                 x.TokenValidationParameters = new TokenValidationParameters
@@ -60,6 +55,8 @@ namespace security
                     ValidateAudience = false,
                 };
             });
+
+	        services.AddScoped<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
